@@ -53,6 +53,38 @@ vector<int> sum_long_numbers(const vector<int>& a, const vector<int>& b) {
     reverse(result.begin(), result.end());
     return result;
 }
+//функция вычитания 
+vector<int> subtract_long_numbers(const vector<int>& a, const vector<int>& b) {
+    vector<int> result;
+    int borrow = 0;
+    int a_size = a.size();
+    int b_size = b.size();
+
+    for (int i = 0; i < a_size; i++) {
+        int digit_a = a[a_size - 1 - i];
+        int digit_b = (i < b_size) ? b[b_size - 1 - i] : 0;
+
+        int diff = digit_a - digit_b - borrow;
+
+        if (diff < 0) {
+            diff += 10;
+            borrow = 1;
+        }
+        else {
+            borrow = 0;
+        }
+
+        result.push_back(diff);
+    }
+
+    // Удаление ведущих нулей
+    while (result.size() > 1 && result.back() == 0) {
+        result.pop_back();
+    }
+
+    reverse(result.begin(), result.end());
+    return result;
+}
 
 
 int main()
@@ -61,11 +93,13 @@ int main()
     vector<int> a = read_long_number();
     vector<int> b = read_long_number();
 
-    
-
     vector<int> sum = sum_long_numbers(a, b);
     cout << "\nСумма чисел: ";
     print_vector(sum);
+
+    vector<int> subtract = subtract_long_numbers(a, b);
+    cout << "\nРазница чисел: ";
+    print_vector(subtract);
 
     return 0;
 }
