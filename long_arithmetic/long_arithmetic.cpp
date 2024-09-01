@@ -188,6 +188,30 @@ vector<int> divide_long_numbers(const vector<int>& a, const vector<int>& b) {
     return result;
 }
 
+//функция деления mod
+vector<int> mod_long_numbers(const vector<int>& a, const vector<int>& b) {
+    vector<int> current;
+
+    for (int digit : a) {
+        current.push_back(digit);
+
+        // Удаляем ведущие нули
+        while (current.size() > 1 && current.front() == 0) {
+            current.erase(current.begin());
+        }
+
+        while (subtract_long_numbers(current, b).second == false) { // Проверяем, что текущий результат >= 0
+            current = subtract_long_numbers(current, b).first;
+        }
+    }
+
+    // Удаляем ведущие нули из остатка
+    while (current.size() > 1 && current.front() == 0) {
+        current.erase(current.begin());
+    }
+
+    return current;
+}
 
 
 
@@ -221,6 +245,15 @@ int main() {
     vector<int> div_ba = divide_long_numbers(b, a);
     cout << "\nЧастное чисел (b div a): ";
     print_vector(div_ba);
+
+    vector<int> mod_ab = mod_long_numbers(a, b);
+    cout << "\nОстаток от деления чисел (a mod b): ";
+    print_vector(mod_ab);
+
+    vector<int> mod_ba = mod_long_numbers(b, a);
+    cout << "\nОстаток от деления чисел (b mod a): ";
+    print_vector(mod_ba);
+
 
     return 0;
 }
