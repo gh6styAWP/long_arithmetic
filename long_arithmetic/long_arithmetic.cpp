@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 using namespace std;
+//функция сложения и умножения не правильно работают с отрицательными значениями
+//функции не правильно работают если оба значения отрицательны
 
 //функция для заполнения вектора
 vector<int> read_long_number() {
@@ -109,13 +111,29 @@ pair<vector<int>, bool> subtract_long_numbers(const vector<int>& a, const vector
 
 //функция умножения
 vector<int> multiply_long_numbers(const vector<int>& a, const vector<int>& b) {
-    vector<int> result(a.size() + b.size(), 0);
+    bool a_negative = false;
+    bool b_negative = false;
 
-    // Умножаем каждую цифру из a на каждую цифру из b
-    for (int i = a.size() - 1; i >= 0; i--) {
+    // Проверка знака первого числа
+    if (!a.empty() && a[0] == '-') {
+        a_negative = true;
+    }
+
+    // Проверка знака второго числа
+    if (!b.empty() && b[0] == '-') {
+        b_negative = true;
+    }
+
+    vector<int> abs_a = a_negative ? vector<int>(a.begin() + 1, a.end()) : a;
+    vector<int> abs_b = b_negative ? vector<int>(b.begin() + 1, b.end()) : b;
+
+    vector<int> result(abs_a.size() + abs_b.size(), 0);
+
+    // Умножаем каждую цифру из abs_a на каждую цифру из abs_b
+    for (int i = abs_a.size() - 1; i >= 0; i--) {
         int carry = 0;
-        for (int j = b.size() - 1; j >= 0; j--) {
-            int product = a[i] * b[j] + result[i + j + 1] + carry;
+        for (int j = abs_b.size() - 1; j >= 0; j--) {
+            int product = abs_a[i] * abs_b[j] + result[i + j + 1] + carry;
             carry = product / 10;
             result[i + j + 1] = product % 10;
         }
@@ -127,8 +145,50 @@ vector<int> multiply_long_numbers(const vector<int>& a, const vector<int>& b) {
         result.erase(result.begin());
     }
 
+    // Если знаки разные, результат отрицательный
+    if (a_negative != b_negative) {
+        result.insert(result.begin(), '-');
+    }
+
     return result;
 }
+
+//функция div
+vector<int> divide_long_numbers(const vector<int>& a, const vector<int>& b) {
+    vector<int> result;
+    vector<int> current;
+
+    for (int digit : a) {
+        current.push_back(digit);
+
+        // Удаляем ведущие нули
+        while (current.size() > 1 && current.front() == 0) {
+            current.erase(current.begin());
+        }
+
+        int count = 0;
+        while (subtract_long_numbers(current, b).second == false) { // Проверяем, что текущий результат >= 0
+            current = subtract_long_numbers(current, b).first;
+            count++;
+        }
+
+        result.push_back(count);
+    }
+
+    // Удаляем ведущие нули из результата
+    while (result.size() > 1 && result.front() == 0) {
+        result.erase(result.begin());
+    }
+
+    // Если результат пустой, это означает, что частное равно нулю
+    if (result.empty()) {
+        result.push_back(0);
+    }
+
+    return result;
+}
+
+
 
 
 
@@ -153,6 +213,14 @@ int main() {
     vector<int> multiply = multiply_long_numbers(a, b);
     cout << "\nПроизведение чисел (a * b): ";
     print_vector(multiply);
+
+    vector<int> div_ab = divide_long_numbers(a, b);
+    cout << "\nЧастное чисел (a div b): ";
+    print_vector(div_ab);
+
+    vector<int> div_ba = divide_long_numbers(b, a);
+    cout << "\nЧастное чисел (b div a): ";
+    print_vector(div_ba);
 
     return 0;
 }
