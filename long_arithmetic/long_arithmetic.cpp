@@ -22,9 +22,12 @@ vector<int> read_long_number() {
 }
 
 //функция вывода вектора
-void print_vector(const vector<int>& num_vector) {
-    for (int digit : num_vector) 
-        cout << digit;  
+void print_vector(const vector<int>& num_vector, bool is_negative = false) {
+    if (is_negative) {
+        cout << "-";
+    }
+    for (int digit : num_vector)
+        cout << digit;
 
     cout << endl;
 }
@@ -54,17 +57,33 @@ vector<int> sum_long_numbers(const vector<int>& a, const vector<int>& b) {
     return result;
 }
 //функция вычитания 
-vector<int> subtract_long_numbers(const vector<int>& a, const vector<int>& b) {
+pair<vector<int>, bool> subtract_long_numbers(const vector<int>& a, const vector<int>& b) {
     vector<int> result;
     int borrow = 0;
-    int a_size = a.size();
-    int b_size = b.size();
+    bool negative = false;
 
-    for (int i = 0; i < a_size; i++) {
-        int digit_a = a[a_size - 1 - i];
-        int digit_b = (i < b_size) ? b[b_size - 1 - i] : 0;
+    const vector<int>* larger;
+    const vector<int>* smaller;
 
-        int diff = digit_a - digit_b - borrow;
+    // Определяем, какое число больше
+    if (a.size() > b.size() || (a.size() == b.size() && a >= b)) {
+        larger = &a;
+        smaller = &b;
+    }
+    else {
+        larger = &b;
+        smaller = &a;
+        negative = true; // результат будет отрицательным
+    }
+
+    int larger_size = larger->size();
+    int smaller_size = smaller->size();
+
+    for (int i = 0; i < larger_size; i++) {
+        int digit_larger = (*larger)[larger_size - 1 - i];
+        int digit_smaller = (i < smaller_size) ? (*smaller)[smaller_size - 1 - i] : 0;
+
+        int diff = digit_larger - digit_smaller - borrow;
 
         if (diff < 0) {
             diff += 10;
@@ -83,13 +102,16 @@ vector<int> subtract_long_numbers(const vector<int>& a, const vector<int>& b) {
     }
 
     reverse(result.begin(), result.end());
-    return result;
+
+    return make_pair(result, negative);
 }
 
 
-int main()
-{
+
+
+int main() {
     setlocale(LC_ALL, "Ru");
+
     vector<int> a = read_long_number();
     vector<int> b = read_long_number();
 
@@ -97,10 +119,15 @@ int main()
     cout << "\nСумма чисел: ";
     print_vector(sum);
 
-    vector<int> subtract = subtract_long_numbers(a, b);
-    cout << "\nРазница чисел: ";
-    print_vector(subtract);
+    auto subtract_ab = subtract_long_numbers(a, b);
+    cout << "\nРазница чисел (a - b): ";
+    print_vector(subtract_ab.first, subtract_ab.second);
+
+    auto subtract_ba = subtract_long_numbers(b, a);
+    cout << "\nРазница чисел (b - a): ";
+    print_vector(subtract_ba.first, subtract_ba.second);
 
     return 0;
 }
+
 
