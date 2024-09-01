@@ -56,6 +56,7 @@ vector<int> sum_long_numbers(const vector<int>& a, const vector<int>& b) {
     reverse(result.begin(), result.end());
     return result;
 }
+
 //функция вычитания 
 pair<vector<int>, bool> subtract_long_numbers(const vector<int>& a, const vector<int>& b) {
     vector<int> result;
@@ -106,6 +107,28 @@ pair<vector<int>, bool> subtract_long_numbers(const vector<int>& a, const vector
     return make_pair(result, negative);
 }
 
+//функция умножения
+vector<int> multiply_long_numbers(const vector<int>& a, const vector<int>& b) {
+    vector<int> result(a.size() + b.size(), 0);
+
+    // Умножаем каждую цифру из a на каждую цифру из b
+    for (int i = a.size() - 1; i >= 0; i--) {
+        int carry = 0;
+        for (int j = b.size() - 1; j >= 0; j--) {
+            int product = a[i] * b[j] + result[i + j + 1] + carry;
+            carry = product / 10;
+            result[i + j + 1] = product % 10;
+        }
+        result[i] += carry;
+    }
+
+    // Удаляем ведущие нули
+    while (result.size() > 1 && result.front() == 0) {
+        result.erase(result.begin());
+    }
+
+    return result;
+}
 
 
 
@@ -116,7 +139,7 @@ int main() {
     vector<int> b = read_long_number();
 
     vector<int> sum = sum_long_numbers(a, b);
-    cout << "\nСумма чисел: ";
+    cout << "\nСумма чисел (a + b): ";
     print_vector(sum);
 
     auto subtract_ab = subtract_long_numbers(a, b);
@@ -126,6 +149,10 @@ int main() {
     auto subtract_ba = subtract_long_numbers(b, a);
     cout << "\nРазница чисел (b - a): ";
     print_vector(subtract_ba.first, subtract_ba.second);
+
+    vector<int> multiply = multiply_long_numbers(a, b);
+    cout << "\nПроизведение чисел (a * b): ";
+    print_vector(multiply);
 
     return 0;
 }
