@@ -2,8 +2,8 @@
 #include <vector>
 #include <string>
 using namespace std;
-//функция сложения и умножения не правильно работают с отрицательными значениями
-//функции не правильно работают если оба значения отрицательны
+//с положительными числами все работает
+//с одним отрицательным или обоими отрицательными не работает
 
 //функция для заполнения вектора
 vector<int> read_long_number() {
@@ -222,10 +222,12 @@ int main() {
     vector<int> a = read_long_number();
     vector<int> b = read_long_number();
 
+    //сложение
     vector<int> sum = sum_long_numbers(a, b);
     cout << "\nСумма чисел (a + b): ";
     print_vector(sum);
 
+    //вычитание
     auto subtract_ab = subtract_long_numbers(a, b);
     cout << "\nРазница чисел (a - b): ";
     print_vector(subtract_ab.first, subtract_ab.second);
@@ -234,10 +236,12 @@ int main() {
     cout << "\nРазница чисел (b - a): ";
     print_vector(subtract_ba.first, subtract_ba.second);
 
+    //умножение
     vector<int> multiply = multiply_long_numbers(a, b);
     cout << "\nПроизведение чисел (a * b): ";
     print_vector(multiply);
 
+    //деление div
     vector<int> div_ab = divide_long_numbers(a, b);
     cout << "\nЧастное чисел (a div b): ";
     print_vector(div_ab);
@@ -246,6 +250,7 @@ int main() {
     cout << "\nЧастное чисел (b div a): ";
     print_vector(div_ba);
 
+    //деление mod
     vector<int> mod_ab = mod_long_numbers(a, b);
     cout << "\nОстаток от деления чисел (a mod b): ";
     print_vector(mod_ab);
@@ -254,6 +259,8 @@ int main() {
     cout << "\nОстаток от деления чисел (b mod a): ";
     print_vector(mod_ba);
 
+
+    //testtest
 
     return 0;
 }
