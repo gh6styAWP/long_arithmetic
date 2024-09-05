@@ -7,6 +7,7 @@ using namespace std;
 //вспомогательная функция для удаления ведущих нулей
 void remove_leading_zeros(vector<char>& num) {
     while(num.size() > 1 && num[0] == '0') num.erase(num.begin());
+    if (num.empty()) num.push_back('0'); //если результат пустой, добавляем '0'
 }
 //функция сложения двух векторов
 vector<char> add_positive_numbers(const vector<char>& num1, const vector<char>& num2) {
@@ -47,12 +48,12 @@ bool is_greater_or_equal(const vector<char>& num1, const vector<char>& num2) {
     }
     return true; //если все цифры одинаковые, числа равны
 }
-//функция для вычитания двух чисел (при условии num1 > num2)
+//функция для вычитания двух чисел
 vector<char> subtract_positive_numbers(const vector<char>& num1, const vector<char>& num2) {
     vector<char> result;
     int borrow = 0;
-    int i = num1.size();
-    int j = num2.size();
+    int i = num1.size() - 1;
+    int j = num2.size() - 1;
 
     while (i >= 0 || j >= 0) {
         int diff = (i >= 0 ? num1[i] - '0' : 0) - (j >= 0 ? num2[j] - '0' : 0) - borrow;
@@ -60,19 +61,20 @@ vector<char> subtract_positive_numbers(const vector<char>& num1, const vector<ch
             diff += 10;
             borrow = 1;
         }
-        else
+        else 
             borrow = 0;
-
+        
         result.push_back(diff + '0');
         i--;
         j--;
     }
 
     reverse(result.begin(), result.end());
-    remove_leading_zeros(result);
+    remove_leading_zeros(result); //удаление ведущих нулей
     return result;
 }
-//основная функция сложения с учетом знаков
+
+//основная функция сложения с учётом знаков
 vector<char> add_long_numbers(const vector<char>& num1, const vector<char>& num2) {
     bool num1_negative = (num1[0] == '-');
     bool num2_negative = (num2[0] == '-');
@@ -84,9 +86,7 @@ vector<char> add_long_numbers(const vector<char>& num1, const vector<char>& num2
     vector<char> result;
 
     //оба числа положительные
-    if (!num1_negative && !num2_negative) 
-        result = add_positive_numbers(abs_num1, abs_num2);
-
+    if (!num1_negative && !num2_negative) result = add_positive_numbers(abs_num1, abs_num2);   
     //оба числа отрицательные
     else if (num1_negative && num2_negative) {
         result = add_positive_numbers(abs_num1, abs_num2);
@@ -94,17 +94,24 @@ vector<char> add_long_numbers(const vector<char>& num1, const vector<char>& num2
     }
     //одно число положительное, другое отрицательное
     else {
+        //проверяем, какое из чисел больше по модулю
         if (is_greater_or_equal(abs_num1, abs_num2)) {
+            //если abs_num1 >= abs_num2, то вычитаем abs_num2 из abs_num1
             result = subtract_positive_numbers(abs_num1, abs_num2);
+            //если num1 отрицательное, то результат будет отрицательный
             if (num1_negative) 
-                result.insert(result.begin(), '-');           
-        }
-        else {
-            result = subtract_positive_numbers(abs_num2, abs_num1);
-            if (num2_negative) 
                 result.insert(result.begin(), '-');            
         }
+        else {
+            //если abs_num2 > abs_num1, то вычитаем abs_num1 из abs_num2
+            result = subtract_positive_numbers(abs_num2, abs_num1);
+            //если num2 отрицательное, то результат положительный, иначе отрицательный
+            if (!num1_negative) result.insert(result.begin(), '-');            
+        }
     }
+
+    if (result.empty()) result.push_back('0');
+
     return result;
 }
 
@@ -117,28 +124,24 @@ int main() {
     vector<char> num1;
     vector<char> num2;
     string input1, input2;
-
+    
+    //ввод и заполнение векторов
     cout << "Введите первое число: ";
     cin >> input1;
-
-    //заполнение вектора введенными числами
     for (char c : input1)
         num1.push_back(c);
 
     cout << "\nВведите второе число: ";
     cin >> input2;
-
     for (char c : input2)
         num2.push_back(c);
 
-    // Сложение чисел
+    // Сложение чисел и вывод результата
     vector<char> result = add_long_numbers(num1, num2);
+    cout << "\nРезультат сложения: ";
 
-    // Вывод результата
-    cout << "Результат сложения: ";
-    for (char c : result) {
+    for (char c : result) 
         cout << c;
-    }
     cout << endl;
 
     return 0;
