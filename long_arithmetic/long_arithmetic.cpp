@@ -3,6 +3,8 @@
 #include <string>
 #include <algorithm>
 using namespace std;
+//сложение работает хорошо со всеми знаками
+//вычитание работает хорошо со всеми знаками
 
 //вспомогательная функция для удаления ведущих нулей
 void remove_leading_zeros(vector<char>& num) {
@@ -73,7 +75,6 @@ vector<char> subtract_positive_numbers(const vector<char>& num1, const vector<ch
     remove_leading_zeros(result); //удаление ведущих нулей
     return result;
 }
-
 //основная функция сложения с учётом знаков
 vector<char> add_long_numbers(const vector<char>& num1, const vector<char>& num2) {
     bool num1_negative = (num1[0] == '-');
@@ -109,9 +110,45 @@ vector<char> add_long_numbers(const vector<char>& num1, const vector<char>& num2
             if (!num1_negative) result.insert(result.begin(), '-');            
         }
     }
-
     if (result.empty()) result.push_back('0');
+    return result;
+}
+//основная функция вычитания с учётом знаков
+vector<char> subtract_long_numbers(const vector<char>& num1, const vector<char>& num2) {
+    bool num1_negative = (num1[0] == '-');
+    bool num2_negative = (num2[0] == '-');
 
+    //преобразуем числа в абсолютные значения
+    vector<char> abs_num1 = num1_negative ? vector<char>(num1.begin() + 1, num1.end()) : num1;
+    vector<char> abs_num2 = num2_negative ? vector<char>(num2.begin() + 1, num2.end()) : num2;
+    vector<char> result;
+
+    //num1 - num2 (оба положительные)
+    if (!num1_negative && !num2_negative) {
+        if (is_greater_or_equal(abs_num1, abs_num2)) result = subtract_positive_numbers(abs_num1, abs_num2); 
+        else {
+            result = subtract_positive_numbers(abs_num2, abs_num1);
+            result.insert(result.begin(), '-'); //результат отрицательный
+        }
+    }
+    //num1 - (-num2) => num1 + abs(num2)
+    else if (!num1_negative && num2_negative) result = add_positive_numbers(abs_num1, abs_num2);   
+    //(-num1) - num2 => -(abs(num1) + abs(num2))
+    else if (num1_negative && !num2_negative) {
+        result = add_positive_numbers(abs_num1, abs_num2);
+        result.insert(result.begin(), '-');
+    }
+    //(-num1) - (-num2) => num2 - num1
+    else {
+        if (is_greater_or_equal(abs_num1, abs_num2)) {
+            result = subtract_positive_numbers(abs_num1, abs_num2);
+            result.insert(result.begin(), '-');
+        }
+        else 
+            result = subtract_positive_numbers(abs_num2, abs_num1);        
+    }
+    if (result.empty()) 
+        result.push_back('0');
     return result;
 }
 
@@ -143,6 +180,16 @@ int main() {
     for (char c : result) 
         cout << c;
     cout << endl;
+
+    //вычитание чисел
+
+    vector<char> result2 = subtract_long_numbers(num1, num2);
+    cout << "\nРезультат вычитания: ";
+
+    for (char c : result2)
+        cout << c;
+    cout << endl;
+
 
     return 0;
 }
