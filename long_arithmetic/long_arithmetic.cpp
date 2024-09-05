@@ -1,12 +1,112 @@
 ﻿#include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 using namespace std;
-//с положительными числами все работает
-//с одним отрицательным или обоими отрицательными не работает
 
+//вспомогательная функция для удаления ведущих нулей
+void remove_leading_zeros(vector<char>& num) {
+    while(num.size() > 1 && num[0] == '0') num.erase(num.begin());
+}
+//функция сложения двух векторов
+vector<char> add_positive_numbers(const vector<char>& num1, const vector<char>& num2) {
+    vector<char> result;
+    int carry = 0;
+    int i = num1.size() - 1;
+    int j = num2.size() - 1;
 
+    //сложение чисел справа налево
+    while (i >= 0 || j >= 0 || carry) {
+        int sum = carry;
+        if (i >= 0) {
+            sum += num1[i] - '0';
+            i--;
+        }
+        if (j >= 0) {
+            sum += num2[j] - '0';
+            j--;
+        }
 
+        //вот эта штуковина переводит число в другой разряд если оно больше 9
+        result.push_back(sum % 10 + '0');
+        carry = sum / 10;
+    }
+    //выводим результат в обратном порядке
+    reverse(result.begin(), result.end());
+    return result;
+}
+//функция сравнения двух чисел по модулю
+bool is_greater_or_equal(const vector<char>& num1, const vector<char>& num2) {
+    if (num1.size() != num2.size())
+        return num1.size() > num2.size(); //если размер разный, большее по размеру число считается большим
+
+    //если длины одинаковые, сравниваем цифры по порядку
+    for (int i = 0; i < num1.size(); i++) {
+        if (num1[i] != num2[i])
+            return num1[i] > num2[i]; //возвращаем резултат сравнения первой отличной цифры
+    }
+    return true; //если все цифры одинаковые, числа равны
+}
+//функция для вычитания двух чисел (при условии num1 > num2)
+vector<char> subtract_positive_numbers(const vector<char>& num1, const vector<char>& num2) {
+    vector<char> result;
+    int borrow = 0;
+    int i = num1.size();
+    int j = num2.size();
+
+    while (i >= 0 || j >= 0) {
+        int diff = (i >= 0 ? num1[i] - '0' : 0) - (j >= 0 ? num2[j] - '0' : 0) - borrow;
+        if (diff < 0) {
+            diff += 10;
+            borrow = 1;
+        }
+        else
+            borrow = 0;
+
+        result.push_back(diff + '0');
+        i--;
+        j--;
+    }
+
+    reverse(result.begin(), result.end());
+    remove_leading_zeros(result);
+    return result;
+}
+//основная функция сложения с учетом знаков
+vector<char> add_long_numbers(const vector<char>& num1, const vector<char>& num2) {
+    bool num1_negative = (num1[0] == '-');
+    bool num2_negative = (num2[0] == '-');
+
+    //преобразуем числа в абсолютные значения
+    vector<char> abs_num1 = num1_negative ? vector<char>(num1.begin() + 1, num1.end()) : num1;
+    vector<char> abs_num2 = num2_negative ? vector<char>(num2.begin() + 1, num2.end()) : num2;
+
+    vector<char> result;
+
+    //оба числа положительные
+    if (!num1_negative && !num2_negative) 
+        result = add_positive_numbers(abs_num1, abs_num2);
+
+    //оба числа отрицательные
+    else if (num1_negative && num2_negative) {
+        result = add_positive_numbers(abs_num1, abs_num2);
+        result.insert(result.begin(), '-');
+    }
+    //одно число положительное, другое отрицательное
+    else {
+        if (is_greater_or_equal(abs_num1, abs_num2)) {
+            result = subtract_positive_numbers(abs_num1, abs_num2);
+            if (num1_negative) 
+                result.insert(result.begin(), '-');           
+        }
+        else {
+            result = subtract_positive_numbers(abs_num2, abs_num1);
+            if (num2_negative) 
+                result.insert(result.begin(), '-');            
+        }
+    }
+    return result;
+}
 
 
 
@@ -31,7 +131,15 @@ int main() {
     for (char c : input2)
         num2.push_back(c);
 
-   
+    // Сложение чисел
+    vector<char> result = add_long_numbers(num1, num2);
+
+    // Вывод результата
+    cout << "Результат сложения: ";
+    for (char c : result) {
+        cout << c;
+    }
+    cout << endl;
 
     return 0;
 }
