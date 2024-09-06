@@ -156,14 +156,14 @@ vector<char> multiply_long_numbers(const vector<char>& num1, const vector<char>&
     bool num1_negative = (num1[0] == '-');
     bool num2_negative = (num2[0] == '-');
 
-    // Преобразуем числа в абсолютные значения
+    //преобразуем числа в абсолютные значения
     vector<char> abs_num1 = num1_negative ? vector<char>(num1.begin() + 1, num1.end()) : num1;
     vector<char> abs_num2 = num2_negative ? vector<char>(num2.begin() + 1, num2.end()) : num2;
 
-    // Результат может иметь максимум abs_num1.size() + abs_num2.size() цифр
+    //результат может иметь максимум abs_num1.size() + abs_num2.size() цифр
     vector<int> result(abs_num1.size() + abs_num2.size(), 0);
 
-    // Умножение каждой цифры abs_num1 на каждую цифру abs_num2
+    //умножение каждой цифры abs_num1 на каждую цифру abs_num2
     for (int i = abs_num1.size() - 1; i >= 0; i--) {
         int carry = 0;
         for (int j = abs_num2.size() - 1; j >= 0; j--) {
@@ -174,19 +174,19 @@ vector<char> multiply_long_numbers(const vector<char>& num1, const vector<char>&
         result[i] += carry;
     }
 
-    // Преобразуем вектор результата в вектор символов
+    //преобразуем вектор результата в вектор символов
     vector<char> final_result;
     bool leading_zero = true;
     for (int digit : result) {
-        if (digit == 0 && leading_zero) continue;  // Пропускаем ведущие нули     
+        if (digit == 0 && leading_zero) continue;  //пропускаем ведущие нули     
         leading_zero = false;
         final_result.push_back(digit + '0');
     }
 
-    // Если результат пустой, это значит, что произведение равно 0
+    //если результат пустой, это значит, что произведение равно 0
     if (final_result.empty()) final_result.push_back('0');
     
-    // Учитываем знак результата
+    //учитываем знак результата
     if (num1_negative != num2_negative && !(final_result.size() == 1 && final_result[0] == '0'))
         final_result.insert(final_result.begin(), '-');
 
@@ -197,19 +197,15 @@ vector<char> divide_long_numbers(const vector<char>& num1, const vector<char>& n
     bool num1_negative = (num1[0] == '-');
     bool num2_negative = (num2[0] == '-');
 
-    // Преобразуем числа в абсолютные значения
+    //преобразуем числа в абсолютные значения
     vector<char> abs_num1 = num1_negative ? vector<char>(num1.begin() + 1, num1.end()) : num1;
     vector<char> abs_num2 = num2_negative ? vector<char>(num2.begin() + 1, num2.end()) : num2;
 
-    // Если деление на ноль, генерируем ошибку
-    if (abs_num2.size() == 1 && abs_num2[0] == '0') {
-        throw invalid_argument("Деление на ноль невозможно.");
-    }
-
-    // Если делимое меньше делителя, результат деления — 0
-    if (is_greater_or_equal(abs_num2, abs_num1)) {
-        return vector<char>{'0'};
-    }
+    //если деление на ноль, генерируем ошибку
+    if (abs_num2.size() == 1 && abs_num2[0] == '0') throw invalid_argument("Деление на ноль невозможно.");
+    
+    //если делимое меньше делителя, результат деления — 0
+    if (is_greater_or_equal(abs_num2, abs_num1)) return vector<char>{'0'};
 
     vector<char> result;
     vector<char> current;
@@ -228,19 +224,55 @@ vector<char> divide_long_numbers(const vector<char>& num1, const vector<char>& n
 
     remove_leading_zeros(result);
 
-    // Если результат пустой (например, при делении 0), делаем его "0"
-    if (result.empty()) {
-        result.push_back('0');
-    }
+    //если результат пустой (например, при делении 0), делаем его "0"
+    if (result.empty()) result.push_back('0');
 
-    // Учитываем знак результата
-    if (num1_negative != num2_negative && !(result.size() == 1 && result[0] == '0')) {
-        result.insert(result.begin(), '-');
-    }
-
+    //учитываем знак результата
+    if (num1_negative != num2_negative && !(result.size() == 1 && result[0] == '0')) result.insert(result.begin(), '-');
+    
     return result;
 }
+//функция деления mod
+vector<char> mod_long_numbers(const vector<char>& num1, const vector<char>& num2) {
+    bool num1_negative = (num1[0] == '-');
 
+    // Преобразуем числа в абсолютные значения
+    vector<char> abs_num1 = num1_negative ? vector<char>(num1.begin() + 1, num1.end()) : num1;
+    vector<char> abs_num2 = (num2[0] == '-') ? vector<char>(num2.begin() + 1, num2.end()) : num2;
+
+    // Если деление на ноль, генерируем ошибку
+    if (abs_num2.size() == 1 && abs_num2[0] == '0') {
+        throw invalid_argument("Деление на ноль невозможно.");
+    }
+
+    // Если делимое меньше делителя, результат остатка — это само делимое
+    if (is_greater_or_equal(abs_num2, abs_num1)) {
+        return num1;
+    }
+
+    vector<char> current;
+
+    for (char digit : abs_num1) {
+        current.push_back(digit);
+        remove_leading_zeros(current);
+
+        while (is_greater_or_equal(current, abs_num2)) {
+            current = subtract_positive_numbers(current, abs_num2);
+        }
+    }
+
+    // Если результат пустой, возвращаем "0"
+    if (current.empty()) {
+        current.push_back('0');
+    }
+
+    // Учитываем знак результата (остаток имеет тот же знак, что и делимое)
+    if (num1_negative && !(current.size() == 1 && current[0] == '0')) {
+        current.insert(current.begin(), '-');
+    }
+
+    return current;
+}
 
 int main() {
     setlocale(LC_ALL, "Ru");
@@ -308,6 +340,23 @@ int main() {
     for (char c : result6)
         cout << c;
     cout << endl;
+
+    //деление чисел (mod) и вывод результата (a mod b)
+    vector<char> result7 = mod_long_numbers(num1, num2);
+    cout << "\nРезультат деления (mod) (a mod b): ";
+
+    for (char c : result7)
+        cout << c;
+    cout << endl;
+
+    //деление чисел (mod) и вывод результата (b mod a)
+    vector<char> result8 = mod_long_numbers(num2, num1);
+    cout << "\nРезультат деления (mod) (b mod a): ";
+
+    for (char c : result8)
+        cout << c;
+    cout << endl;
+
 
     return 0;
 }
