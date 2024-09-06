@@ -3,8 +3,6 @@
 #include <string>
 #include <algorithm>
 using namespace std;
-//сложение работает хорошо со всеми знаками
-//вычитание работает хорошо со всеми знаками
 
 //вспомогательная функция для удаления ведущих нулей
 void remove_leading_zeros(vector<char>& num) {
@@ -236,41 +234,28 @@ vector<char> divide_long_numbers(const vector<char>& num1, const vector<char>& n
 vector<char> mod_long_numbers(const vector<char>& num1, const vector<char>& num2) {
     bool num1_negative = (num1[0] == '-');
 
-    // Преобразуем числа в абсолютные значения
+    //преобразуем числа в абсолютные значения
     vector<char> abs_num1 = num1_negative ? vector<char>(num1.begin() + 1, num1.end()) : num1;
     vector<char> abs_num2 = (num2[0] == '-') ? vector<char>(num2.begin() + 1, num2.end()) : num2;
 
-    // Если деление на ноль, генерируем ошибку
-    if (abs_num2.size() == 1 && abs_num2[0] == '0') {
-        throw invalid_argument("Деление на ноль невозможно.");
-    }
+    //если деление на ноль, генерируем ошибку
+    if (abs_num2.size() == 1 && abs_num2[0] == '0') throw invalid_argument("Деление на ноль невозможно.");   
 
-    // Если делимое меньше делителя, результат остатка — это само делимое
-    if (is_greater_or_equal(abs_num2, abs_num1)) {
-        return num1;
-    }
-
+    //если делимое меньше делителя, результат остатка — это само делимое
+    if (is_greater_or_equal(abs_num2, abs_num1)) return num1;
     vector<char> current;
 
     for (char digit : abs_num1) {
         current.push_back(digit);
         remove_leading_zeros(current);
-
-        while (is_greater_or_equal(current, abs_num2)) {
-            current = subtract_positive_numbers(current, abs_num2);
-        }
+        while (is_greater_or_equal(current, abs_num2)) current = subtract_positive_numbers(current, abs_num2);      
     }
 
-    // Если результат пустой, возвращаем "0"
-    if (current.empty()) {
-        current.push_back('0');
-    }
-
-    // Учитываем знак результата (остаток имеет тот же знак, что и делимое)
-    if (num1_negative && !(current.size() == 1 && current[0] == '0')) {
-        current.insert(current.begin(), '-');
-    }
-
+    //если результат пустой, возвращаем "0"
+    if (current.empty()) current.push_back('0');
+    
+    //учитываем знак результата (остаток имеет тот же знак, что и делимое)
+    if (num1_negative && !(current.size() == 1 && current[0] == '0')) current.insert(current.begin(), '-');
     return current;
 }
 
