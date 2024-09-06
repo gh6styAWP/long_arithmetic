@@ -151,7 +151,95 @@ vector<char> subtract_long_numbers(const vector<char>& num1, const vector<char>&
         result.push_back('0');
     return result;
 }
+//функция умножения с учётом знаков
+vector<char> multiply_long_numbers(const vector<char>& num1, const vector<char>& num2) {
+    bool num1_negative = (num1[0] == '-');
+    bool num2_negative = (num2[0] == '-');
 
+    // Преобразуем числа в абсолютные значения
+    vector<char> abs_num1 = num1_negative ? vector<char>(num1.begin() + 1, num1.end()) : num1;
+    vector<char> abs_num2 = num2_negative ? vector<char>(num2.begin() + 1, num2.end()) : num2;
+
+    // Результат может иметь максимум abs_num1.size() + abs_num2.size() цифр
+    vector<int> result(abs_num1.size() + abs_num2.size(), 0);
+
+    // Умножение каждой цифры abs_num1 на каждую цифру abs_num2
+    for (int i = abs_num1.size() - 1; i >= 0; i--) {
+        int carry = 0;
+        for (int j = abs_num2.size() - 1; j >= 0; j--) {
+            int product = (abs_num1[i] - '0') * (abs_num2[j] - '0') + result[i + j + 1] + carry;
+            carry = product / 10;
+            result[i + j + 1] = product % 10;
+        }
+        result[i] += carry;
+    }
+
+    // Преобразуем вектор результата в вектор символов
+    vector<char> final_result;
+    bool leading_zero = true;
+    for (int digit : result) {
+        if (digit == 0 && leading_zero) continue;  // Пропускаем ведущие нули     
+        leading_zero = false;
+        final_result.push_back(digit + '0');
+    }
+
+    // Если результат пустой, это значит, что произведение равно 0
+    if (final_result.empty()) final_result.push_back('0');
+    
+    // Учитываем знак результата
+    if (num1_negative != num2_negative && !(final_result.size() == 1 && final_result[0] == '0'))
+        final_result.insert(final_result.begin(), '-');
+
+    return final_result;
+}
+//функция деления div
+vector<char> divide_long_numbers(const vector<char>& num1, const vector<char>& num2) {
+    bool num1_negative = (num1[0] == '-');
+    bool num2_negative = (num2[0] == '-');
+
+    // Преобразуем числа в абсолютные значения
+    vector<char> abs_num1 = num1_negative ? vector<char>(num1.begin() + 1, num1.end()) : num1;
+    vector<char> abs_num2 = num2_negative ? vector<char>(num2.begin() + 1, num2.end()) : num2;
+
+    // Если деление на ноль, генерируем ошибку
+    if (abs_num2.size() == 1 && abs_num2[0] == '0') {
+        throw invalid_argument("Деление на ноль невозможно.");
+    }
+
+    // Если делимое меньше делителя, результат деления — 0
+    if (is_greater_or_equal(abs_num2, abs_num1)) {
+        return vector<char>{'0'};
+    }
+
+    vector<char> result;
+    vector<char> current;
+
+    for (char digit : abs_num1) {
+        current.push_back(digit);
+        remove_leading_zeros(current);
+
+        int quotient_digit = 0;
+        while (is_greater_or_equal(current, abs_num2)) {
+            current = subtract_positive_numbers(current, abs_num2);
+            quotient_digit++;
+        }
+        result.push_back(quotient_digit + '0');
+    }
+
+    remove_leading_zeros(result);
+
+    // Если результат пустой (например, при делении 0), делаем его "0"
+    if (result.empty()) {
+        result.push_back('0');
+    }
+
+    // Учитываем знак результата
+    if (num1_negative != num2_negative && !(result.size() == 1 && result[0] == '0')) {
+        result.insert(result.begin(), '-');
+    }
+
+    return result;
+}
 
 
 int main() {
@@ -173,7 +261,7 @@ int main() {
     for (char c : input2)
         num2.push_back(c);
 
-    // Сложение чисел и вывод результата
+    //сложение чисел и вывод результата
     vector<char> result = add_long_numbers(num1, num2);
     cout << "\nРезультат сложения: ";
 
@@ -181,15 +269,45 @@ int main() {
         cout << c;
     cout << endl;
 
-    //вычитание чисел
-
+    //вычитание чисел и вывод результата (a - b)
     vector<char> result2 = subtract_long_numbers(num1, num2);
-    cout << "\nРезультат вычитания: ";
+    cout << "\nРезультат вычитания (a - b): ";
 
     for (char c : result2)
         cout << c;
     cout << endl;
 
+    //вычитание чисел и вывод результата (b - a)
+    vector<char> result3 = subtract_long_numbers(num2, num1);
+    cout << "\nРезультат вычитания(b - a): ";
+
+    for (char c : result3)
+        cout << c;
+    cout << endl;
+
+    //умножение чисел и вывод рузультата
+    vector<char> result4 = multiply_long_numbers(num1, num2);
+    cout << "\nРезультат умножения: ";
+
+    for (char c : result4)
+        cout << c;
+    cout << endl;
+
+    //деление чисел (div) и вывод результата (a div b)
+    vector<char> result5 = divide_long_numbers(num1, num2);
+    cout << "\nРезультат деления (div) (a div b): ";
+
+    for (char c : result5)
+        cout << c;
+    cout << endl;
+
+    //деление чисел (div) и вывод результата (b div a)
+    vector<char> result6 = divide_long_numbers(num2, num1);
+    cout << "\nРезультат деления (div) (a div b): ";
+
+    for (char c : result6)
+        cout << c;
+    cout << endl;
 
     return 0;
 }
